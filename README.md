@@ -41,17 +41,25 @@ Then open:
 - http://localhost:8080/
 - http://localhost:8080/h2-console (JDBC URL: jdbc:h2:mem:soilsync)
 
-## Deploy a public demo on Railway
+## Free demo hosting and custom domain
 
-The application includes a Dockerfile and supports Railway's assigned `PORT`.
+The application includes a Dockerfile, supports the host-assigned `PORT`, and
+has a Render Blueprint configured for the free web-service plan.
 
-1. Sign in at [Railway](https://railway.com/) and create a project from the
-   GitHub repository [`SHHV308/SoilSync`](https://github.com/SHHV308/SoilSync).
-2. Deploy the service using the Dockerfile in the repository root.
-3. In the service's **Settings → Networking**, choose **Generate Domain**.
-   Share the generated `https://…up.railway.app` URL so anyone can open the
-   app in their browser.
-4. Optionally set the service health-check path to `/api/health`.
+1. Sign in to [Render](https://render.com/). Deploy the public
+   [`SHHV308/SoilSync` repository](https://github.com/SHHV308/SoilSync) as a
+   Blueprint service. Review the plan and select **Free** before deploying.
+2. Wait for the first Docker build and health check at `/api/health` to pass.
+   The Render dashboard will show the public `https://…onrender.com` address.
+3. In the web service's **Settings → Custom Domains**, add `soilsync.in`.
+   Render will also add `www.soilsync.in`.
+4. At your domain registrar or DNS provider, update the DNS records to the
+   exact values shown by Render, then verify the domain in Render. Render
+   provisions HTTPS automatically after DNS verification.
+
+Free Render web services can go idle and take about a minute to start on the
+next visit. This app's demo data uses an in-memory database and resets after a
+restart or redeploy; don't use it for important farm records.
 
 The demo uses an in-memory H2 database. Its sample data resets when the
 application restarts or redeploys; use a persistent database before relying on
