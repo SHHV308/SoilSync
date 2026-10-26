@@ -1,20 +1,18 @@
 # SoilSync
 
-SoilSync is a demo full-stack agri-tech web application designed for farmers, growers, and gardeners. The project combines a responsive website, a plant-care assistant, product catalog, reminders, and operational analytics in one Spring Boot application.
+SoilSync is a agri-tech web application designed for farmers, growers, and gardeners. The project combines a responsive website, a plant-care assistant, product catalog, reminders, and operational analytics in one Spring Boot application.
 
 ## Live website
 
 Visit the deployed demo: **[https://soilsync.onrender.com](https://soilsync.onrender.com)**
 
-The app is hosted on Render's free web-service plan. It may take about a minute
-to wake up after a period of inactivity.
 
 ## Architecture
 
 - Frontend: responsive static web app served by Spring Boot
 - Backend: Java 17 + Spring Boot 3 + Spring MVC + Spring Data JPA
 - Database: H2 in-memory database for local demo usage
-- Regional crop advisor: live location lookup and weather forecast combined with crop-, growth-stage-, and soil-specific agronomy guidance
+- Regional crop advisor: live location lookup and weather forecast combined with crop-, growth-stage-, and soil-specific agronomy guidance Within karnataka region
 
 ## Features
 
