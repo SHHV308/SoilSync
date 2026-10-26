@@ -1,0 +1,15 @@
+target/
+*.log
+hs_err_pid*
+
+.env
+.env.*
+!.env.example
+
+.idea/
+.vscode/
+*.iml
+.github/modernize/
+
+.DS_Store
+Thumbs.db
