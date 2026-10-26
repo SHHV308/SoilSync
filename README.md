@@ -46,9 +46,9 @@ Then open:
 The application includes a Dockerfile, supports the host-assigned `PORT`, and
 has a Render Blueprint configured for the free web-service plan.
 
-1. Sign in to [Render](https://render.com/). Deploy the public
-   [`SHHV308/SoilSync` repository](https://github.com/SHHV308/SoilSync) as a
-   Blueprint service. Review the plan and select **Free** before deploying.
+1. Sign in to [Render](https://render.com/), then
+   [deploy SoilSync on Render](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FSHHV308%2FSoilSync).
+   Review the plan and select **Free** before deploying.
 2. Wait for the first Docker build and health check at `/api/health` to pass.
    The Render dashboard will show the public `https://…onrender.com` address.
 3. In the web service's **Settings → Custom Domains**, add `soilsync.in`.
@@ -58,13 +58,8 @@ has a Render Blueprint configured for the free web-service plan.
    provisions HTTPS automatically after DNS verification.
 
 Free Render web services can go idle and take about a minute to start on the
-next visit. This app's demo data uses an in-memory database and resets after a
-restart or redeploy; don't use it for important farm records.
-
-The demo uses an in-memory H2 database. Its sample data resets when the
-application restarts or redeploys; use a persistent database before relying on
-it for real farm records. Railway account setup and deployment require signing
-in to Railway.
+next visit. This app's demo data uses an in-memory H2 database and resets after a restart
+or redeploy; don't use it for important farm records.
 
 ## Login
 
