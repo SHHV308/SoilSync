@@ -2,6 +2,13 @@
 
 SoilSync is a demo full-stack agri-tech web application designed for farmers, growers, and gardeners. The project combines a responsive website, a plant-care assistant, product catalog, reminders, and operational analytics in one Spring Boot application.
 
+## Live website
+
+Visit the deployed demo: **[https://soilsync.onrender.com](https://soilsync.onrender.com)**
+
+The app is hosted on Render's free web-service plan. It may take about a minute
+to wake up after a period of inactivity.
+
 ## Architecture
 
 - Frontend: responsive static web app served by Spring Boot
@@ -41,21 +48,16 @@ Then open:
 - http://localhost:8080/
 - http://localhost:8080/h2-console (JDBC URL: jdbc:h2:mem:soilsync)
 
-## Free demo hosting and custom domain
+## Hosting and custom domain
 
-The application includes a Dockerfile, supports the host-assigned `PORT`, and
-has a Render Blueprint configured for the free web-service plan.
+The live demo is deployed from this GitHub repository using the included
+Render Blueprint and Dockerfile. If automatic deploys are enabled in Render,
+pushes to `main` publish updates to the live website.
 
-1. Sign in to [Render](https://render.com/), then
-   [deploy SoilSync on Render](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FSHHV308%2FSoilSync).
-   Review the plan and select **Free** before deploying.
-2. Wait for the first Docker build and health check at `/api/health` to pass.
-   The Render dashboard will show the public `https://…onrender.com` address.
-3. In the web service's **Settings → Custom Domains**, add `soilsync.in`.
-   Render will also add `www.soilsync.in`.
-4. At your domain registrar or DNS provider, update the DNS records to the
-   exact values shown by Render, then verify the domain in Render. Render
-   provisions HTTPS automatically after DNS verification.
+To connect the custom domain `soilsync.in`, add it in the Render web service's
+**Settings → Custom Domains**. Then set the DNS records at your domain
+registrar to the exact values Render provides and verify the domain in Render.
+Render provisions HTTPS after DNS verification.
 
 Free Render web services can go idle and take about a minute to start on the
 next visit. This app's demo data uses an in-memory H2 database and resets after a restart
