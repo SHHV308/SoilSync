@@ -41,52 +41,22 @@ Then open:
 - http://localhost:8080/
 - http://localhost:8080/h2-console (JDBC URL: jdbc:h2:mem:soilsync)
 
-## Production hosting for https://soilsync.in
+## Deploy a public demo on Railway
 
-This project is ready to deploy behind a reverse proxy to a live domain such as `https://soilsync.in`, but the actual live deployment requires access to your hosting account, DNS records, and TLS certificate management.
+The application includes a Dockerfile and supports Railway's assigned `PORT`.
 
-Recommended deployment flow:
+1. Sign in at [Railway](https://railway.com/) and create a project from the
+   GitHub repository [`SHHV308/SoilSync`](https://github.com/SHHV308/SoilSync).
+2. Deploy the service using the Dockerfile in the repository root.
+3. In the service's **Settings → Networking**, choose **Generate Domain**.
+   Share the generated `https://…up.railway.app` URL so anyone can open the
+   app in their browser.
+4. Optionally set the service health-check path to `/api/health`.
 
-1. Build the application JAR:
-
-```bash
-mvn clean package
-```
-
-2. Run the built app on the server:
-
-```bash
-java -jar target/SoilSync-0.0.1-SNAPSHOT.jar
-```
-
-3. Point Nginx or Caddy at the app on port 8080 and enable HTTPS for `soilsync.in`.
-
-4. If you are using a reverse proxy, keep `server.forward-headers-strategy=framework` enabled so redirects and generated URLs work correctly behind SSL termination.
-
-Example Nginx snippet:
-
-```nginx
-server {
-    listen 80;
-    server_name soilsync.in www.soilsync.in;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name soilsync.in www.soilsync.in;
-
-    ssl_certificate /etc/letsencrypt/live/soilsync.in/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/soilsync.in/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-```
+The demo uses an in-memory H2 database. Its sample data resets when the
+application restarts or redeploys; use a persistent database before relying on
+it for real farm records. Railway account setup and deployment require signing
+in to Railway.
 
 ## Login
 
