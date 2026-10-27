@@ -55,7 +55,7 @@ public class DashboardController {
         response.put("activeReminderCount", activeReminders);
         response.put("monthlyRevenue", revenue);
         response.put("recentOrders", recentOrders);
-        response.put("summary", "Demo season summary for Karnataka gardens and field plots");
+        response.put("summary", "Demo season summary for gardens and field plots");
         return response;
     }
 }

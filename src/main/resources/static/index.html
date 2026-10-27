@@ -55,33 +55,78 @@
     <section id="assistant" class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">Regional crop advisor · Live weather</span>
+                <span class="eyebrow">Global crop advisor · Live weather</span>
                 <h2>Get advice for your field, not a generic answer.</h2>
-                <p>Share your location, crop, growth stage, and soil. SoilSync checks live local weather before suggesting a nutrient plan.</p>
+                <p>Search for a place anywhere in the world, or enter coordinates with their country and region. SoilSync checks live local weather and clearly flags when vetted local crop guidance is unavailable.</p>
             </div>
         </div>
         <form id="chatForm" class="chat-form">
             <div class="advice-form-grid">
                 <label>
-                    Town, village, or district
-                    <input id="farmRegion" type="text" required maxlength="120" placeholder="e.g. Mysuru, Karnataka" />
+                    Location entry
+                    <select id="locationMode">
+                        <option value="place">Search for a city or place</option>
+                        <option value="coordinates">Enter coordinates</option>
+                    </select>
                 </label>
                 <label>
                     Crop
-                    <select id="farmCrop" required>
-                        <option value="">Choose a crop</option>
-                        <option>Rice</option>
-                        <option>Wheat</option>
-                        <option>Maize</option>
-                        <option>Cotton</option>
-                        <option>Tomato</option>
-                        <option>Chilli</option>
-                        <option>Sugarcane</option>
-                        <option>Groundnut</option>
-                        <option>Pulses</option>
-                        <option>Millet</option>
-                    </select>
+                    <input id="farmCrop" type="text" list="commonCrops" required maxlength="120" placeholder="Enter any crop, e.g. maize" />
+                    <datalist id="commonCrops">
+                        <option value="Rice"></option>
+                        <option value="Wheat"></option>
+                        <option value="Maize"></option>
+                        <option value="Cassava"></option>
+                        <option value="Beans"></option>
+                        <option value="Sorghum"></option>
+                        <option value="Cotton"></option>
+                        <option value="Tomato"></option>
+                        <option value="Potato"></option>
+                        <option value="Millet"></option>
+                    </datalist>
                 </label>
+            </div>
+            <div id="placeLocationFields" class="location-entry-grid">
+                <label>
+                    City, place, or region
+                    <input id="farmRegion" type="text" maxlength="120" placeholder="e.g. Nairobi, Kenya" />
+                </label>
+                <div class="location-search-action">
+                    <span class="optional-label">Choose the result that matches your country and region.</span>
+                    <button id="findPlaceButton" type="button" class="secondary-button">Find places</button>
+                </div>
+                <label id="locationCandidatesLabel" hidden>
+                    Matching places
+                    <select id="locationCandidates"></select>
+                </label>
+            </div>
+            <div id="coordinateLocationFields" class="location-entry-grid" hidden>
+                <label>
+                    Latitude
+                    <input id="latitude" type="number" min="-90" max="90" step="any" placeholder="-1.2864" />
+                </label>
+                <label>
+                    Longitude
+                    <input id="longitude" type="number" min="-180" max="180" step="any" placeholder="36.8172" />
+                </label>
+                <label>
+                    Region or administrative area
+                    <input id="coordinateRegion" type="text" maxlength="120" placeholder="e.g. Nairobi County" />
+                </label>
+                <label>
+                    Country
+                    <input id="coordinateCountry" type="text" maxlength="100" placeholder="e.g. Kenya" />
+                </label>
+                <label>
+                    Two-letter country code
+                    <input id="coordinateCountryCode" type="text" minlength="2" maxlength="2" pattern="[A-Za-z]{2}" placeholder="KE" />
+                </label>
+                <div class="location-search-action">
+                    <span class="optional-label">Country and region are supplied by you; they are not reverse-geocoded.</span>
+                    <button id="findCoordinatesButton" type="button" class="secondary-button">Use these coordinates</button>
+                </div>
+            </div>
+            <div class="advice-form-grid">
                 <label>
                     Crop growth stage
                     <select id="growthStage" required>
@@ -95,16 +140,8 @@
                     </select>
                 </label>
                 <label>
-                    Main soil type
-                    <select id="soilType" required>
-                        <option value="">Choose if known</option>
-                        <option>Sandy</option>
-                        <option>Loam</option>
-                        <option>Clay</option>
-                        <option>Red</option>
-                        <option>Black</option>
-                        <option>Unknown</option>
-                    </select>
+                    Soil type
+                    <input id="soilType" type="text" required maxlength="100" placeholder="Enter if known; otherwise type Unknown" value="Unknown" />
                 </label>
             </div>
             <label>
@@ -117,7 +154,7 @@
             </div>
         </form>
         <div id="aiResponse" class="ai-response" aria-live="polite">
-            Enter your field details to get a local forecast and crop-stage nutrient guidance.
+            Select a place or enter coordinates with country and region details to check its live forecast.
         </div>
     </section>
 

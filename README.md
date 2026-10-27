@@ -19,7 +19,7 @@ to wake up after a period of inactivity.
 ## Features
 
 - Overview dashboard with key metrics
-- Regional crop advisor using live weather for fertilizer timing and crop-stage guidance
+- Worldwide place search and coordinate-based crop advisor with live weather and explicit coverage limits
 - Plant journal and care tracking
 - Reminder scheduler for watering, pruning, and fertilization
 - Product catalog for organic soil products
@@ -67,11 +67,28 @@ or redeploy; don't use it for important farm records.
 
 The demo app allows anonymous browsing. The UI does not require an account for the local demonstration.
 
-## Regional crop advice
+## Global location and crop-advice coverage
 
-The advisor asks for an Indian town/district, crop, growth stage, and soil type. It geocodes the location and retrieves current conditions plus a three-day forecast from the public Open-Meteo APIs. It combines that live weather with crop-stage guidance and the selected soil type, and warns when rain or heat makes fertilizer application risky.
+The advisor searches place names worldwide with Open-Meteo geocoding. If a
+name matches multiple places, select the result with the correct country and
+region. For coordinates, enter the latitude, longitude, country, two-letter
+country code, and region yourself; coordinates are not reverse-geocoded.
+Weather lookup uses the selected coordinates and Open-Meteo's automatic
+timezone. The Köppen-Geiger climate zone is shown as `UNCLASSIFIED` until a
+vetted classification dataset is selected and integrated.
 
-Weather and location lookups require an internet connection. If the live source is unavailable or the location cannot be found, the advisor shows an error rather than substituting generic or stale weather. Fertilizer rates are not guessed: exact quantities require a current soil test and the relevant district agriculture department or university crop package. The guidance is decision support, not a substitute for local agronomic advice.
+The advisor uses only country/crop documents that have complete source
+metadata and `status: vetted`. No regional documents are currently vetted.
+Until a source is reviewed, answers explicitly state that local crop coverage
+is missing and provide only general safety principles. It does not invent
+regional recommendations or calculate fertilizer rates.
+
+See [`src/main/resources/knowledge/README.md`](src/main/resources/knowledge/README.md)
+for the document structure, required citations, review workflow, and
+placeholders. Location and weather lookups require an internet connection. If
+a live source is unavailable, the advisor reports an error instead of using
+stale or generic weather. All advice is decision support, not a substitute
+for local agronomic advice.
 
 ## Notes
 

@@ -11,6 +11,7 @@ public record CropAdviceResponse(
     List<String> recommendations,
     WeatherSnapshot weather,
     List<String> dataSources,
-    Instant fetchedAt
+    Instant fetchedAt,
+    LocationCandidate locationDetails
 ) {
 }

@@ -2,7 +2,9 @@ package com.soilsync.app.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.soilsync.app.model.LocationCandidate;
 import com.soilsync.app.model.WeatherSnapshot;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,6 +17,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Service
 public class OpenMeteoClient implements RegionalWeatherClient {
@@ -22,38 +28,85 @@ public class OpenMeteoClient implements RegionalWeatherClient {
     private static final String GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
     private static final String FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
     private static final String SOURCE = "https://open-meteo.com/";
+    private static final Set<String> ISO_COUNTRY_CODES = Set.of(Locale.getISOCountries());
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final String geocodingUrl;
+    private final String forecastUrl;
 
+    @Autowired
     public OpenMeteoClient(ObjectMapper objectMapper) {
+        this(
+            objectMapper,
+            HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(8))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build(),
+            GEOCODING_URL,
+            FORECAST_URL
+        );
+    }
+
+    OpenMeteoClient(ObjectMapper objectMapper, HttpClient httpClient, String geocodingUrl, String forecastUrl) {
         this.objectMapper = objectMapper;
-        this.httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
+        this.httpClient = httpClient;
+        this.geocodingUrl = geocodingUrl;
+        this.forecastUrl = forecastUrl;
     }
 
     @Override
     public WeatherAtLocation getWeather(String region) {
-        JsonNode geocoding = getJson(GEOCODING_URL + "?name=" + encode(region + ", India")
-            + "&count=1&language=en&format=json");
-        JsonNode results = geocoding.path("results");
-        if (!results.isArray() || results.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "We could not find that place. Try a nearby town, district, or city in India.");
+        return getWeather(region, null);
+    }
+
+    @Override
+    public List<LocationCandidate> searchLocations(String query) {
+        if (query == null || query.trim().length() < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Enter at least two characters to search for a place.");
         }
 
-        JsonNode place = results.get(0);
-        double latitude = requiredNumber(place, "latitude");
-        double longitude = requiredNumber(place, "longitude");
-        String placeName = requiredText(place, "name");
-        String state = place.path("admin1").asText("");
-        String location = state.isBlank() ? placeName : placeName + ", " + state;
+        JsonNode geocoding = getJson(geocodingUrl + "?name=" + encode(query.trim())
+            + "&count=10&language=en&format=json");
+        JsonNode results = geocoding.path("results");
+        if (!results.isArray()) {
+            return List.of();
+        }
 
-        String forecastUri = FORECAST_URL
-            + "?latitude=" + latitude
-            + "&longitude=" + longitude
+        List<LocationCandidate> locations = new ArrayList<>();
+        for (JsonNode result : results) {
+            locations.add(new LocationCandidate(
+                requiredId(result, "id"),
+                requiredText(result, "name"),
+                optionalText(result, "admin1"),
+                optionalText(result, "admin2"),
+                requiredText(result, "country"),
+                requiredText(result, "country_code").toUpperCase(Locale.ROOT),
+                requiredNumber(result, "latitude"),
+                requiredNumber(result, "longitude"),
+                optionalText(result, "timezone"),
+                "UNCLASSIFIED",
+                "Open-Meteo geocoding"
+            ));
+        }
+        return List.copyOf(locations);
+    }
+
+    @Override
+    public WeatherAtLocation getWeather(String region, LocationCandidate selection) {
+        LocationCandidate place;
+        if (selection == null) {
+            place = resolveLocationSelection(searchLocations(region), null);
+        } else if ("coordinates".equals(selection.id())) {
+            place = validateCoordinateSelection(selection);
+        } else {
+            place = resolveLocationSelection(searchLocations(region), selection.id());
+        }
+
+        String forecastUri = forecastUrl
+            + "?latitude=" + place.latitude()
+            + "&longitude=" + place.longitude()
             + "&current=temperature_2m,relative_humidity_2m,precipitation,weather_code"
             + "&daily=precipitation_probability_max,precipitation_sum,temperature_2m_max"
             + "&forecast_days=3&timezone=auto";
@@ -68,13 +121,19 @@ public class OpenMeteoClient implements RegionalWeatherClient {
         double expectedRain = firstArrayNumber(daily, "precipitation_sum");
         double expectedHigh = firstArrayNumber(daily, "temperature_2m_max");
         String forecastDate = firstArrayText(daily, "time");
+        String timezone = optionalText(forecast, "timezone");
+        if (timezone.isBlank()) {
+            timezone = place.timezone();
+        }
+        LocationCandidate resolvedPlace = place.withTimezone(timezone.isBlank() ? "Unknown" : timezone);
         String summary = String.format(
+            Locale.ROOT,
             "Forecast for %s: up to %.0f%% rain chance, %.1f mm expected rain, and a high near %.1f°C.",
             forecastDate, (double) rainProbability, expectedRain, expectedHigh
         );
 
         return new WeatherAtLocation(
-            location,
+            resolvedPlace.displayName(),
             new WeatherSnapshot(
                 temperature,
                 humidity,
@@ -82,7 +141,53 @@ public class OpenMeteoClient implements RegionalWeatherClient {
                 rainProbability,
                 summary,
                 SOURCE
-            )
+            ),
+            resolvedPlace
+        );
+    }
+
+    static LocationCandidate resolveLocationSelection(List<LocationCandidate> results, String selectedId) {
+        if (results.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "We could not find that place. Try a city, region, or country name.");
+        }
+        if (selectedId == null && results.size() > 1) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Several places match. Search for the place and select the country and region before requesting advice.");
+        }
+        if (selectedId == null) {
+            return results.get(0);
+        }
+        return results.stream()
+            .filter(candidate -> candidate.id().equals(selectedId))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "The selected place no longer matches the search. Search again and select a result."));
+    }
+
+    private static LocationCandidate validateCoordinateSelection(LocationCandidate selection) {
+        if (!Double.isFinite(selection.latitude()) || selection.latitude() < -90 || selection.latitude() > 90
+            || !Double.isFinite(selection.longitude()) || selection.longitude() < -180 || selection.longitude() > 180
+            || selection.country() == null || selection.country().isBlank()
+            || selection.countryCode() == null
+            || !(ISO_COUNTRY_CODES.contains(selection.countryCode().toUpperCase(Locale.ROOT))
+                || "XK".equalsIgnoreCase(selection.countryCode()))
+            || selection.admin1() == null || selection.admin1().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Coordinates require valid latitude/longitude and a country, two-letter country code, and region.");
+        }
+        return new LocationCandidate(
+            "coordinates",
+            "",
+            selection.admin1().trim(),
+            "",
+            selection.country().trim(),
+            selection.countryCode().toUpperCase(Locale.ROOT),
+            selection.latitude(),
+            selection.longitude(),
+            selection.timezone(),
+            "UNCLASSIFIED",
+            "User-provided coordinates and region"
         );
     }
 
@@ -131,6 +236,20 @@ public class OpenMeteoClient implements RegionalWeatherClient {
         return value.asText();
     }
 
+    private static String optionalText(JsonNode parent, String field) {
+        JsonNode value = parent.path(field);
+        return value.isTextual() ? value.asText().trim() : "";
+    }
+
+    private static String requiredId(JsonNode parent, String field) {
+        JsonNode value = parent.path(field);
+        if (!value.canConvertToLong()) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                "The live location service returned incomplete place data.");
+        }
+        return value.asText();
+    }
+
     private static double firstArrayNumber(JsonNode parent, String field) {
         JsonNode values = parent.path(field);
         if (!values.isArray() || values.isEmpty() || !values.get(0).isNumber()) {
@@ -149,6 +268,9 @@ public class OpenMeteoClient implements RegionalWeatherClient {
         return values.get(0).asText();
     }
 
-    public record WeatherAtLocation(String location, WeatherSnapshot weather) {
+    public record WeatherAtLocation(String location, WeatherSnapshot weather, LocationCandidate locationDetails) {
+        public WeatherAtLocation(String location, WeatherSnapshot weather) {
+            this(location, weather, null);
+        }
     }
 }
