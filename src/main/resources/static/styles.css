@@ -83,6 +83,36 @@ img {
     color: var(--text);
 }
 
+.main-nav {
+    align-items: center;
+}
+
+.language-picker select {
+    font: inherit;
+    padding: 6px 10px;
+    border: 1px solid rgba(22, 59, 43, 0.2);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--text);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.translation-notice {
+    padding: 10px 24px;
+    background: #fff8e1;
+    border-bottom: 1px solid rgba(160, 120, 0, 0.3);
+    color: #5c4500;
+    font-size: 0.95rem;
+}
+
 main {
     max-width: 1200px;
     margin: 0 auto;

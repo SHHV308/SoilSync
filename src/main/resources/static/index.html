@@ -12,33 +12,42 @@
         <div class="brand-mark">S</div>
         <div>
             <div class="brand-name">SoilSync</div>
-            <div class="brand-subtitle">Agri-tech operations</div>
+            <div class="brand-subtitle" data-i18n="brand.subtitle">Agri-tech operations</div>
         </div>
     </div>
     <nav class="main-nav">
-        <a href="#home">Home</a>
-        <a href="#assistant">AI Assistant</a>
-        <a href="#garden">My Planta</a>
+        <a href="#home" data-i18n="nav.home">Home</a>
+        <a href="#assistant" data-i18n="nav.assistant">AI Assistant</a>
+        <a href="#garden" data-i18n="nav.garden">My Plants</a>
+        <label class="language-picker">
+            <span class="visually-hidden" data-i18n="lang.label">Language</span>
+            <select id="languageSelect" aria-label="Language">
+                <option value="en">English</option>
+            </select>
+        </label>
     </nav>
 </header>
+<div id="translationNotice" class="translation-notice" role="note" hidden data-i18n="i18n.machineNotice">
+    This translation was machine-generated and has not been reviewed by a human agronomist. Check important advice with your local extension service.
+</div>
 
 <main>
     <section class="hero" id="home">
         <div class="hero-copy">
-            <span class="eyebrow">Organic farming support</span>
-            <h1>Smarter soil care for better harvests.</h1>
-            <p>Track plant health, schedule reminders, and let the SoilSync assistant guide your next action.</p>
+            <span class="eyebrow" data-i18n="hero.eyebrow">Organic farming support</span>
+            <h1 data-i18n="hero.title">Smarter soil care for better harvests.</h1>
+            <p data-i18n="hero.body">Track plant health, schedule reminders, and let the SoilSync assistant guide your next action.</p>
             <div class="hero-actions">
-                <a class="primary-button" href="#assistant">Ask AI Assistant</a>
+                <a class="primary-button" href="#assistant" data-i18n="hero.cta">Ask AI Assistant</a>
             </div>
         </div>
         <div class="hero-card">
             <div class="mini-stat">
-                <span>Healthy plots</span>
+                <span data-i18n="hero.healthyPlots">Healthy plots</span>
                 <strong id="heroHealthyPlots">0</strong>
             </div>
             <div class="mini-stat highlighted">
-                <span>Active reminders</span>
+                <span data-i18n="hero.activeReminders">Active reminders</span>
                 <strong id="heroReminders">0</strong>
             </div>
         </div>
@@ -47,23 +56,23 @@
     <section id="assistant" class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">Global crop advisor · Live weather</span>
-                <h2>Get advice for your field, not a generic answer.</h2>
-                <p>Search for a place anywhere in the world, or enter coordinates with their country and region. SoilSync checks live local weather and clearly flags when vetted local crop guidance is unavailable.</p>
+                <span class="eyebrow" data-i18n="advisor.eyebrow">Global crop advisor · Live weather</span>
+                <h2 data-i18n="advisor.title">Get advice for your field, not a generic answer.</h2>
+                <p data-i18n="advisor.intro">Search for a place anywhere in the world, or enter coordinates with their country and region. SoilSync checks live local weather and clearly flags when vetted local crop guidance is unavailable.</p>
             </div>
         </div>
         <form id="chatForm" class="chat-form">
             <div class="advice-form-grid">
                 <label>
-                    Location entry
+                    <span data-i18n="form.locationEntry">Location entry</span>
                     <select id="locationMode">
-                        <option value="place">Search for a city or place</option>
-                        <option value="coordinates">Enter coordinates</option>
+                        <option value="place" data-i18n="form.mode.place">Search for a city or place</option>
+                        <option value="coordinates" data-i18n="form.mode.coordinates">Enter coordinates</option>
                     </select>
                 </label>
                 <label>
-                    Crop
-                    <input id="farmCrop" type="text" list="commonCrops" required maxlength="120" placeholder="Enter any crop, e.g. maize" />
+                    <span data-i18n="form.crop">Crop</span>
+                    <input id="farmCrop" type="text" list="commonCrops" required maxlength="120" placeholder="Enter any crop, e.g. maize" data-i18n-placeholder="form.cropPlaceholder" />
                     <datalist id="commonCrops">
                         <option value="Rice"></option>
                         <option value="Wheat"></option>
@@ -80,69 +89,69 @@
             </div>
             <div id="placeLocationFields" class="location-entry-grid">
                 <label>
-                    City, place, or region
-                    <input id="farmRegion" type="text" maxlength="120" placeholder="e.g. Nairobi, Kenya" />
+                    <span data-i18n="form.city">City, place, or region</span>
+                    <input id="farmRegion" type="text" maxlength="120" placeholder="e.g. Nairobi, Kenya" data-i18n-placeholder="form.cityPlaceholder" />
                 </label>
                 <div class="location-search-action">
-                    <span class="optional-label">Choose the result that matches your country and region.</span>
-                    <button id="findPlaceButton" type="button" class="secondary-button">Find places</button>
+                    <span class="optional-label" data-i18n="form.chooseResult">Choose the result that matches your country and region.</span>
+                    <button id="findPlaceButton" type="button" class="secondary-button" data-i18n="form.findPlaces">Find places</button>
                 </div>
                 <label id="locationCandidatesLabel" hidden>
-                    Matching places
+                    <span data-i18n="form.matchingPlaces">Matching places</span>
                     <select id="locationCandidates"></select>
                 </label>
             </div>
             <div id="coordinateLocationFields" class="location-entry-grid" hidden>
                 <label>
-                    Latitude
+                    <span data-i18n="form.latitude">Latitude</span>
                     <input id="latitude" type="number" min="-90" max="90" step="any" placeholder="-1.2864" />
                 </label>
                 <label>
-                    Longitude
+                    <span data-i18n="form.longitude">Longitude</span>
                     <input id="longitude" type="number" min="-180" max="180" step="any" placeholder="36.8172" />
                 </label>
                 <label>
-                    Region or administrative area
-                    <input id="coordinateRegion" type="text" maxlength="120" placeholder="e.g. Nairobi County" />
+                    <span data-i18n="form.region">Region or administrative area</span>
+                    <input id="coordinateRegion" type="text" maxlength="120" placeholder="e.g. Nairobi County" data-i18n-placeholder="form.regionPlaceholder" />
                 </label>
                 <label>
-                    Country
-                    <input id="coordinateCountry" type="text" maxlength="100" placeholder="e.g. Kenya" />
+                    <span data-i18n="form.country">Country</span>
+                    <input id="coordinateCountry" type="text" maxlength="100" placeholder="e.g. Kenya" data-i18n-placeholder="form.countryPlaceholder" />
                 </label>
                 <label>
-                    Two-letter country code
+                    <span data-i18n="form.countryCode">Two-letter country code</span>
                     <input id="coordinateCountryCode" type="text" minlength="2" maxlength="2" pattern="[A-Za-z]{2}" placeholder="KE" />
                 </label>
                 <div class="location-search-action">
-                    <span class="optional-label">Country and region are supplied by you; they are not reverse-geocoded.</span>
-                    <button id="findCoordinatesButton" type="button" class="secondary-button">Use these coordinates</button>
+                    <span class="optional-label" data-i18n="form.coordinatesNote">Country and region are supplied by you; they are not reverse-geocoded.</span>
+                    <button id="findCoordinatesButton" type="button" class="secondary-button" data-i18n="form.useCoordinates">Use these coordinates</button>
                 </div>
             </div>
             <div class="advice-form-grid">
                 <label>
-                    Crop growth stage
+                    <span data-i18n="form.stage">Crop growth stage</span>
                     <select id="growthStage" required>
-                        <option value="">Choose a stage</option>
-                        <option>Sowing / planting</option>
-                        <option>Establishment / early growth</option>
-                        <option>Vegetative growth</option>
-                        <option>Flowering</option>
-                        <option>Fruit / grain filling</option>
-                        <option>Harvest approaching</option>
+                        <option value="" data-i18n="form.stage.choose">Choose a stage</option>
+                        <option value="Sowing / planting" data-i18n="stage.sowing">Sowing / planting</option>
+                        <option value="Establishment / early growth" data-i18n="stage.establishment">Establishment / early growth</option>
+                        <option value="Vegetative growth" data-i18n="stage.vegetative">Vegetative growth</option>
+                        <option value="Flowering" data-i18n="stage.flowering">Flowering</option>
+                        <option value="Fruit / grain filling" data-i18n="stage.filling">Fruit / grain filling</option>
+                        <option value="Harvest approaching" data-i18n="stage.harvest">Harvest approaching</option>
                     </select>
                 </label>
                 <label>
-                    Soil type
-                    <input id="soilType" type="text" required maxlength="100" placeholder="Enter if known; otherwise type Unknown" value="Unknown" />
+                    <span data-i18n="form.soil">Soil type</span>
+                    <input id="soilType" type="text" required maxlength="100" placeholder="Enter if known; otherwise type Unknown" data-i18n-placeholder="form.soilPlaceholder" value="Unknown" />
                 </label>
             </div>
             <label>
-                What do you want to improve? <span class="optional-label">Optional</span>
-                <textarea id="chatInput" rows="3" maxlength="500" placeholder="e.g. The leaves are pale and rain is forecast. Should I top-dress now?"></textarea>
+                <span data-i18n="form.question">What do you want to improve?</span> <span class="optional-label" data-i18n="form.optional">Optional</span>
+                <textarea id="chatInput" rows="3" maxlength="500" placeholder="e.g. The leaves are pale and rain is forecast. Should I top-dress now?" data-i18n-placeholder="form.questionPlaceholder"></textarea>
             </label>
             <div class="chat-actions">
-                <span class="live-data-note">Uses live forecast for the entered location</span>
-                <button id="adviceSubmit" type="submit" class="primary-button">Check my field</button>
+                <span class="live-data-note" data-i18n="form.liveNote">Uses live forecast for the entered location</span>
+                <button id="adviceSubmit" type="submit" class="primary-button" data-i18n="form.submit">Check my field</button>
             </div>
         </form>
         <div id="aiResponse" class="ai-response" aria-live="polite">
@@ -153,14 +162,15 @@
     <section id="garden" class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">My plants & gardens</span>
-                <h2>Farm monitoring</h2>
+                <span class="eyebrow" data-i18n="garden.eyebrow">My plants & gardens</span>
+                <h2 data-i18n="garden.title">Farm monitoring</h2>
             </div>
         </div>
         <div id="plantList" class="card-grid"></div>
     </section>
 </main>
 
+<script src="/i18n.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

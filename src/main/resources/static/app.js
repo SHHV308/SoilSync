@@ -24,6 +24,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     let locationResults = [];
     let selectedLocation = null;
 
+    const t = (key, params) => i18n.t(key, params);
+    let lastPlants = [];
+    let shownInitial = '';
+
+    let i18nReady = false;
+    try {
+        await i18n.init();
+        i18nReady = true;
+    } catch (error) {
+        console.error(error); // The page keeps its built-in English text.
+    }
+    if (i18nReady) {
+        shownInitial = t('advisor.initial');
+        aiResponse.textContent = shownInitial;
+        i18n.onChange(() => {
+            const previous = shownInitial;
+            shownInitial = t('advisor.initial');
+            if (aiResponse.textContent.trim() === previous) aiResponse.textContent = shownInitial;
+            renderPlants(lastPlants);
+        });
+    }
+
     async function fetchJson(url, options = {}) {
         const response = await fetch(url, {
             headers: { 'Content-Type': 'application/json' },
@@ -39,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch {
                 // Keep a non-JSON response message as-is.
             }
-            throw new Error(message || `Request failed: ${response.status}`);
+            throw new Error(message || t('err.requestFailed', { status: response.status }));
         }
 
         return response.json();
@@ -53,12 +75,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         heading.textContent = `${response.crop} · ${response.location}`;
         aiResponse.append(heading);
 
+        if (i18n.language !== 'en') {
+            const englishOnly = document.createElement('p');
+            englishOnly.className = 'advice-updated';
+            englishOnly.textContent = t('advisor.englishOnly');
+            aiResponse.append(englishOnly);
+        }
+
         if (response.locationDetails) {
             const metadata = document.createElement('p');
             const userSupplied = response.locationDetails.metadataSource === 'User-provided coordinates and region'
-                ? ' · Country and region supplied by you'
+                ? t('res.userSupplied')
                 : '';
-            metadata.textContent = `Country code: ${response.locationDetails.countryCode} · Time zone: ${response.locationDetails.timezone} · Köppen-Geiger climate zone: ${response.locationDetails.climateZone}${userSupplied}`;
+            metadata.textContent = t('res.meta', response.locationDetails) + userSupplied;
             aiResponse.append(metadata);
         }
 
@@ -68,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const weather = document.createElement('div');
         weather.className = 'weather-summary';
-        weather.textContent = `Live now: ${response.weather.temperatureC.toFixed(1)}°C · ${response.weather.humidityPercent}% humidity · ${response.weather.precipitationMm.toFixed(1)} mm precipitation`;
+        weather.textContent = t('res.weatherNow', { temp: response.weather.temperatureC.toFixed(1), humidity: response.weather.humidityPercent, precip: response.weather.precipitationMm.toFixed(1) });
         aiResponse.append(weather);
 
         const forecast = document.createElement('p');
@@ -76,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         aiResponse.append(forecast);
 
         const recommendationsHeading = document.createElement('h4');
-        recommendationsHeading.textContent = 'Guidance and safety';
+        recommendationsHeading.textContent = t('res.guidance');
         aiResponse.append(recommendationsHeading);
 
         const recommendations = document.createElement('ul');
@@ -88,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         aiResponse.append(recommendations);
 
         const sourcesHeading = document.createElement('h4');
-        sourcesHeading.textContent = 'Data and limits';
+        sourcesHeading.textContent = t('res.limits');
         aiResponse.append(sourcesHeading);
 
         const sources = document.createElement('ul');
@@ -101,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const updated = document.createElement('small');
         updated.className = 'advice-updated';
-        updated.textContent = `Weather checked ${new Date(response.fetchedAt).toLocaleString()}`;
+        updated.textContent = t('res.checked', { time: new Date(response.fetchedAt).toLocaleString(i18n.language) });
         aiResponse.append(updated);
     }
 
@@ -134,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function showLocationCandidates(candidates) {
         locationResults = candidates;
-        locationCandidatesSelect.replaceChildren(new Option('Choose a matching place...', ''));
+        locationCandidatesSelect.replaceChildren(new Option(t('loc.choose'), ''));
         for (const candidate of candidates) {
             locationCandidatesSelect.add(new Option(
                 `${displayLocationCandidate(candidate)} (${candidate.countryCode})`,
@@ -145,16 +174,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (candidates.length === 1) {
             selectedLocation = candidates[0];
             locationCandidatesLabel.hidden = true;
-            aiResponse.textContent = `Selected location: ${displayLocationCandidate(selectedLocation)}.`;
+            aiResponse.textContent = t('loc.selected', { place: displayLocationCandidate(selectedLocation) });
             return true;
         }
 
         selectedLocation = null;
         locationCandidatesLabel.hidden = candidates.length === 0;
         if (candidates.length > 1) {
-            aiResponse.textContent = 'Several places match. Choose the correct country and region from the list.';
+            aiResponse.textContent = t('loc.several');
         } else {
-            aiResponse.textContent = 'No matching places were found. Try adding a country or region.';
+            aiResponse.textContent = t('loc.none');
         }
         return false;
     }
@@ -186,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const query = farmRegionInput.value.trim();
             if (query.length < 2) {
                 farmRegionInput.focus();
-                farmRegionInput.setCustomValidity('Enter at least two characters to search for a place.');
+                farmRegionInput.setCustomValidity(t('loc.minChars'));
                 farmRegionInput.reportValidity();
                 farmRegionInput.setCustomValidity('');
                 return false;
@@ -197,14 +226,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderPlants(plants) {
+        lastPlants = plants;
         if (!plantList) return;
         plantList.innerHTML = plants.map(plant => `
             <article class="plant-card">
                 <div class="badge">${plant.healthStatus}</div>
                 <h3>${plant.name}</h3>
                 <p class="plant-meta">${plant.variety} · ${plant.location}</p>
-                <p class="plant-meta">Soil: ${plant.soilType}</p>
-                <p class="plant-meta">Next watering: ${new Date(plant.nextWateringAt).toLocaleString()}</p>
+                <p class="plant-meta">${t('plant.soil', { soil: plant.soilType })}</p>
+                <p class="plant-meta">${t('plant.nextWatering', { time: new Date(plant.nextWateringAt).toLocaleString(i18n.language) })}</p>
                 <p class="plant-meta">${plant.notes}</p>
             </article>
         `).join('');
@@ -224,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderPlants(plants);
             renderDashboard(dashboard);
         } catch (error) {
-            aiResponse.textContent = 'The app is loading demo data. Refresh after the backend is running.';
+            aiResponse.textContent = t('err.loadData');
             console.error(error);
         }
     }
@@ -233,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
 
         aiResponse.classList.remove('ai-response-error');
-        aiResponse.textContent = 'Checking the selected location and live forecast...';
+        aiResponse.textContent = t('advisor.checking');
         adviceSubmit.disabled = true;
 
         try {
@@ -255,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderCropAdvice(response);
         } catch (error) {
             aiResponse.classList.add('ai-response-error');
-            aiResponse.textContent = error.message || 'The regional advisor could not retrieve live data right now.';
+            aiResponse.textContent = error.message || t('err.advisor');
             console.error(error);
         } finally {
             adviceSubmit.disabled = false;
@@ -268,7 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await searchForLocation();
         } catch (error) {
             aiResponse.classList.add('ai-response-error');
-            aiResponse.textContent = error.message || 'The location service is unavailable right now.';
+            aiResponse.textContent = error.message || t('err.locationService');
         } finally {
             findPlaceButton.disabled = false;
         }
@@ -280,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await searchForLocation();
         } catch (error) {
             aiResponse.classList.add('ai-response-error');
-            aiResponse.textContent = error.message || 'The location could not be checked right now.';
+            aiResponse.textContent = error.message || t('err.locationCheck');
         } finally {
             findCoordinatesButton.disabled = false;
         }
@@ -300,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     locationCandidatesSelect.addEventListener('change', () => {
         selectedLocation = locationResults.find(candidate => candidate.id === locationCandidatesSelect.value) || null;
         if (selectedLocation) {
-            aiResponse.textContent = `Selected location: ${displayLocationCandidate(selectedLocation)}.`;
+            aiResponse.textContent = t('loc.selected', { place: displayLocationCandidate(selectedLocation) });
         }
     });
 
