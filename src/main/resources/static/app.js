@@ -213,8 +213,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderDashboard(dashboard) {
         document.getElementById('heroHealthyPlots').textContent = dashboard.plantCount || 0;
         document.getElementById('heroReminders').textContent = dashboard.activeReminderCount || 0;
-        document.getElementById('plantCount').textContent = dashboard.plantCount || 0;
-        document.getElementById('reminderCount').textContent = dashboard.activeReminderCount || 0;
     }
 
     async function loadData() {
