@@ -19,8 +19,6 @@
         <a href="#home">Home</a>
         <a href="#assistant">AI Assistant</a>
         <a href="#garden">My Planta</a>
-        <a href="#catalog">Products</a>
-        <a href="#orders">Orders</a>
         <a href="#dashboard">Dashboard</a>
     </nav>
 </header>
@@ -30,10 +28,9 @@
         <div class="hero-copy">
             <span class="eyebrow">Organic farming support</span>
             <h1>Smarter soil care for better harvests.</h1>
-            <p>Track plant health, schedule reminders, browse organic soil inputs, and let the SoilSync assistant guide your next action.</p>
+            <p>Track plant health, schedule reminders, and let the SoilSync assistant guide your next action.</p>
             <div class="hero-actions">
                 <a class="primary-button" href="#assistant">Ask AI Assistant</a>
-                <a class="secondary-button" href="#catalog">Browse Products</a>
             </div>
         </div>
         <div class="hero-card">
@@ -44,10 +41,6 @@
             <div class="mini-stat highlighted">
                 <span>Active reminders</span>
                 <strong id="heroReminders">0</strong>
-            </div>
-            <div class="mini-stat">
-                <span>Revenue</span>
-                <strong id="heroRevenue">0</strong>
             </div>
         </div>
     </section>
@@ -168,55 +161,14 @@
         <div id="plantList" class="card-grid"></div>
     </section>
 
-    <section id="catalog" class="panel">
-        <div class="section-heading">
-            <div>
-                <span class="eyebrow">Organic product store</span>
-                <h2>SoilSync catalog</h2>
-            </div>
-        </div>
-        <div class="catalog-layout">
-            <div id="productList" class="card-grid"></div>
-            <aside class="cart-panel">
-                <h3>Shopping cart</h3>
-                <div id="cartItems" class="cart-items"></div>
-                <div class="cart-total">
-                    <span>Total</span>
-                    <strong id="cartTotal">0</strong>
-                </div>
-                <form id="checkoutForm" class="checkout-form">
-                    <label>
-                        Customer name
-                        <input id="customerName" type="text" placeholder="Enter your name" />
-                    </label>
-                    <button type="submit" class="primary-button">Place order</button>
-                </form>
-            </aside>
-        </div>
-    </section>
-
-    <section id="orders" class="panel">
-        <div class="section-heading">
-            <div>
-                <span class="eyebrow">Orders</span>
-                <h2>Recent deliveries</h2>
-            </div>
-        </div>
-        <div id="orderList" class="list-panel"></div>
-    </section>
-
     <section id="dashboard" class="panel">
         <div class="section-heading">
             <div>
                 <span class="eyebrow">Analytics</span>
-                <h2>Business overview</h2>
+                <h2>Farm overview</h2>
             </div>
         </div>
         <div class="stats-grid">
-            <div class="stat-box">
-                <span>Products</span>
-                <strong id="productCount">0</strong>
-            </div>
             <div class="stat-box">
                 <span>Plants</span>
                 <strong id="plantCount">0</strong>
@@ -224,10 +176,6 @@
             <div class="stat-box">
                 <span>Reminders</span>
                 <strong id="reminderCount">0</strong>
-            </div>
-            <div class="stat-box accent">
-                <span>Monthly revenue</span>
-                <strong id="revenueCount">0</strong>
             </div>
         </div>
     </section>

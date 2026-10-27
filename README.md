@@ -1,6 +1,6 @@
 # SoilSync
 
-SoilSync is a demo full-stack agri-tech web application designed for farmers, growers, and gardeners. The project combines a responsive website, a plant-care assistant, product catalog, reminders, and operational analytics in one Spring Boot application.
+SoilSync is a demo full-stack agri-tech web application designed for farmers, growers, and gardeners. The project combines a responsive website, a plant-care assistant, reminders, and analytics in one Spring Boot application.
 
 ## Live website
 
@@ -22,8 +22,6 @@ to wake up after a period of inactivity.
 - Worldwide place search and coordinate-based crop advisor with live weather and explicit coverage limits
 - Plant journal and care tracking
 - Reminder scheduler for watering, pruning, and fertilization
-- Product catalog for organic soil products
-- Order summary and management
 - Business analytics panel for farm operations
 
 ## Running locally
@@ -136,4 +134,4 @@ not enabled merely by visiting or using the advisor.
 
 ## Notes
 
-This is a professional demo project, not a production-grade agricultural certification or scientific guarantee system. Product claims and recommended application rates are presented as configurable demo content rather than verified agronomic guarantees.
+This is a professional demo project, not a production-grade agricultural certification or scientific guarantee system. Sample plant and reminder data are demo content, not verified agronomic guidance.

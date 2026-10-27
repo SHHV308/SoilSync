@@ -335,121 +335,21 @@ main {
     gap: 16px;
 }
 
-.product-card, .plant-card, .order-item {
+.plant-card {
     background: var(--white);
     border: 1px solid rgba(22, 59, 43, 0.08);
     border-radius: 18px;
     padding: 18px;
 }
 
-.catalog-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 2.2fr) minmax(260px, 0.8fr);
-    gap: 20px;
-    align-items: start;
-}
-
-.cart-panel {
-    background: var(--white);
-    border: 1px solid rgba(22, 59, 43, 0.08);
-    border-radius: 18px;
-    padding: 18px;
-    position: sticky;
-    top: 90px;
-}
-
-.cart-items {
-    display: grid;
-    gap: 12px;
-    margin: 12px 0 18px;
-}
-
-.cart-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid rgba(22, 59, 43, 0.08);
-    padding-bottom: 8px;
-}
-
-.cart-item small {
-    display: block;
-    color: var(--muted);
-}
-
-.cart-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 16px 0;
-    font-size: 1.1rem;
-}
-
-.checkout-form {
-    display: grid;
-    gap: 12px;
-}
-
-.checkout-form input {
-    width: 100%;
-    margin-top: 6px;
-    border: 1px solid rgba(22, 59, 43, 0.12);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font: inherit;
-}
-
-.quantity-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 12px;
-}
-
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.qty-button {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    border: none;
-    background: var(--green-100);
-    color: var(--green-900);
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.product-card h3, .plant-card h3 {
+.plant-card h3 {
     margin: 0 0 8px;
 }
 
-.product-meta, .plant-meta {
+.plant-meta {
     color: var(--muted);
     margin: 6px 0;
     font-size: 0.92rem;
-}
-
-.product-card .price {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 18px 0 10px;
-}
-
-.list-panel {
-    display: grid;
-    gap: 12px;
-}
-
-.order-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
 }
 
 .badge {
@@ -511,14 +411,6 @@ main {
     .chat-actions {
         align-items: stretch;
         flex-direction: column;
-    }
-
-    .catalog-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .cart-panel {
-        position: static;
     }
 
     main {
