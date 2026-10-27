@@ -32,9 +32,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     let locationResults = [];
     let selectedLocation = null;
 
+    // Catalog prices are stored in one configured currency (no conversion); only the formatting follows the browser locale.
+    let catalogCurrency = 'USD';
+    const uiLocale = () => navigator.language || 'en';
+
     const formatCurrency = (value) => {
         const amount = Number(value || 0);
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat(uiLocale(), { style: 'currency', currency: catalogCurrency, maximumFractionDigits: 2 }).format(amount);
     };
 
     async function fetchJson(url, options = {}) {
@@ -343,11 +347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadData() {
         try {
-            const [products, plants, dashboard] = await Promise.all([
+            const [config, products, plants, dashboard] = await Promise.all([
+                fetchJson('/api/config'),
                 fetchJson('/api/products'),
                 fetchJson('/api/plants'),
                 fetchJson('/api/dashboard')
             ]);
+            catalogCurrency = config.catalogCurrency;
             renderProducts(products);
             renderPlants(plants);
             renderDashboard(dashboard);

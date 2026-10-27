@@ -21,3 +21,5 @@ services:
         sync: false
       - key: SOILSYNC_LLM_API_KEY
         sync: false
+      - key: SOILSYNC_CATALOG_CURRENCY
+        value: INR
