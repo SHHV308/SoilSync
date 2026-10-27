@@ -1,5 +1,7 @@
 package com.soilsync.app.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.soilsync.app.model.LocationCandidate;
@@ -16,8 +18,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -34,6 +39,10 @@ public class OpenMeteoClient implements RegionalWeatherClient {
     private final ObjectMapper objectMapper;
     private final String geocodingUrl;
     private final String forecastUrl;
+    private final Cache<String, JsonNode> responseCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(5))
+        .maximumSize(1000)
+        .build();
 
     @Autowired
     public OpenMeteoClient(ObjectMapper objectMapper) {
@@ -140,7 +149,10 @@ public class OpenMeteoClient implements RegionalWeatherClient {
                 precipitation,
                 rainProbability,
                 summary,
-                SOURCE
+                SOURCE,
+                forecastDate,
+                expectedRain,
+                expectedHigh
             ),
             resolvedPlace
         );
@@ -192,6 +204,12 @@ public class OpenMeteoClient implements RegionalWeatherClient {
     }
 
     private JsonNode getJson(String address) {
+        String cacheKey = cacheKey(address);
+        JsonNode cached = responseCache.getIfPresent(cacheKey);
+        if (cached != null) {
+            return cached.deepCopy();
+        }
+
         HttpRequest request = HttpRequest.newBuilder(URI.create(address))
             .timeout(Duration.ofSeconds(12))
             .header("Accept", "application/json")
@@ -203,7 +221,13 @@ public class OpenMeteoClient implements RegionalWeatherClient {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
                     "The live weather service returned HTTP " + response.statusCode() + ".");
             }
-            return objectMapper.readTree(response.body());
+            JsonNode result = objectMapper.readTree(response.body());
+            if (result == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "The live weather service returned an empty response.");
+            }
+            responseCache.put(cacheKey, result.deepCopy());
+            return result;
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
@@ -216,6 +240,16 @@ public class OpenMeteoClient implements RegionalWeatherClient {
 
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private static String cacheKey(String address) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                .digest(address.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is required to safely key the weather cache.", exception);
+        }
     }
 
     private static double requiredNumber(JsonNode parent, String field) {
