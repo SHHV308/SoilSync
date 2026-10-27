@@ -15,7 +15,7 @@ import java.util.UUID;
 public class PrivacyConsentService {
 
     public static final String COOKIE_NAME = "soilsync_privacy_id";
-    public static final String NOTICE = "If you opt in, SoilSync stores this browser's advisory records, "
+    public static final String NOTICE = "If you opt in, SoilSync stores this browser's advisory and chat records, "
         + "including question and answer text after common identifier redaction, selected country and region, "
         + "crop, growth stage, soil type, weather summary, risk flag, sources, feedback, and application outcome. "
         + "Exact coordinates are not stored. Automated redaction may miss personal details; do not include "

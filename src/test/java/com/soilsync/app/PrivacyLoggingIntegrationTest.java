@@ -3,13 +3,18 @@ package com.soilsync.app;
 import com.soilsync.app.model.AdvisoryFeedback;
 import com.soilsync.app.model.AdvisoryLog;
 import com.soilsync.app.model.ApplicationOutcome;
+import com.soilsync.app.model.AssistantChatLog;
+import com.soilsync.app.model.AssistantChatRequest;
+import com.soilsync.app.model.AssistantChatResponse;
 import com.soilsync.app.model.CropAdviceRequest;
 import com.soilsync.app.model.CropAdviceResponse;
 import com.soilsync.app.model.LocationCandidate;
 import com.soilsync.app.model.WeatherSnapshot;
 import com.soilsync.app.repository.AdvisoryLogRepository;
+import com.soilsync.app.repository.AssistantChatLogRepository;
 import com.soilsync.app.repository.PrivacyConsentRepository;
 import com.soilsync.app.service.AdvisoryLogService;
+import com.soilsync.app.service.AssistantChatLogService;
 import com.soilsync.app.service.PrivacyConsentService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -44,7 +49,13 @@ class PrivacyLoggingIntegrationTest {
     private AdvisoryLogService advisoryLogService;
 
     @Autowired
+    private AssistantChatLogService assistantChatLogService;
+
+    @Autowired
     private AdvisoryLogRepository advisoryLogRepository;
+
+    @Autowired
+    private AssistantChatLogRepository assistantChatLogRepository;
 
     @Autowired
     private PrivacyConsentRepository privacyConsentRepository;
@@ -152,10 +163,40 @@ class PrivacyLoggingIntegrationTest {
         assertThat(updated.getFeedback()).isEqualTo(AdvisoryFeedback.HELPFUL);
         assertThat(updated.getApplicationOutcome()).isEqualTo(ApplicationOutcome.DEFERRED_APPLICATION);
 
+        AssistantChatRequest chatRequest = new AssistantChatRequest(
+            "My email is farmer@example.com. Can I use the forecast?",
+            selectedLocation,
+            "Maize",
+            "Flowering",
+            "Loam",
+            "en",
+            "metric"
+        );
+        AssistantChatResponse chatResponse = new AssistantChatResponse(
+            "I cannot verify a local recommendation for this region.",
+            "en",
+            "metric",
+            "Springfield, Illinois, United States",
+            List.of("Open-Meteo"),
+            false,
+            false,
+            null
+        );
+        Long chatId = assistantChatLogService.recordIfConsented(
+            firstBrowser.token(),
+            chatRequest,
+            chatResponse,
+            response.weather()
+        ).orElseThrow();
+        AssistantChatLog chatLog = assistantChatLogRepository.findById(chatId).orElseThrow();
+        assertThat(chatLog.getQuestion()).doesNotContain("farmer@example.com").contains("[REDACTED_EMAIL]");
+        assertThat(chatLog.getWeatherSnapshot()).doesNotContain("39.8", "-89.6");
+
         privacyConsentService.deleteData(firstBrowser.token());
         assertThat(advisoryLogRepository.findAllByConsentId(
             java.util.UUID.fromString(firstBrowser.token())
         )).isEmpty();
+        assertThat(assistantChatLogRepository.findById(chatId)).isEmpty();
         assertThat(privacyConsentRepository.existsById(java.util.UUID.fromString(secondBrowser.token()))).isTrue();
         privacyConsentService.deleteData(secondBrowser.token());
     }

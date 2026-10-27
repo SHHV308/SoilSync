@@ -4,6 +4,7 @@ import com.soilsync.app.model.AdvisoryFeedbackRequest;
 import com.soilsync.app.model.ApplicationOutcomeRequest;
 import com.soilsync.app.model.ConsentRequest;
 import com.soilsync.app.service.AdvisoryLogService;
+import com.soilsync.app.service.AssistantChatLogService;
 import com.soilsync.app.service.PrivacyConsentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,13 +29,16 @@ public class PrivacyController {
 
     private final PrivacyConsentService privacyConsentService;
     private final AdvisoryLogService advisoryLogService;
+    private final AssistantChatLogService chatLogService;
 
     public PrivacyController(
         PrivacyConsentService privacyConsentService,
-        AdvisoryLogService advisoryLogService
+        AdvisoryLogService advisoryLogService,
+        AssistantChatLogService chatLogService
     ) {
         this.privacyConsentService = privacyConsentService;
         this.advisoryLogService = advisoryLogService;
+        this.chatLogService = chatLogService;
     }
 
     @GetMapping("/consent")
@@ -99,6 +103,26 @@ public class PrivacyController {
         @CookieValue(name = PrivacyConsentService.COOKIE_NAME, required = false) String token
     ) {
         advisoryLogService.updateOutcome(token, id, request.outcome());
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+    }
+
+    @PutMapping("/chats/{id}/feedback")
+    public ResponseEntity<Void> updateChatFeedback(
+        @PathVariable Long id,
+        @Valid @RequestBody AdvisoryFeedbackRequest request,
+        @CookieValue(name = PrivacyConsentService.COOKIE_NAME, required = false) String token
+    ) {
+        chatLogService.updateFeedback(token, id, request.feedback());
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+    }
+
+    @PutMapping("/chats/{id}/outcome")
+    public ResponseEntity<Void> updateChatOutcome(
+        @PathVariable Long id,
+        @Valid @RequestBody ApplicationOutcomeRequest request,
+        @CookieValue(name = PrivacyConsentService.COOKIE_NAME, required = false) String token
+    ) {
+        chatLogService.updateOutcome(token, id, request.outcome());
         return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }
 
