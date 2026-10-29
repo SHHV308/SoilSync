@@ -75,3 +75,4 @@ class SoilSyncApplicationTests {
         assertThat(response.dataSources()).anyMatch(item -> item.contains("No vetted regional crop source"));
     }
 }
+
